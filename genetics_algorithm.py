@@ -6,23 +6,50 @@ def main(input_file_path, number_of_generation_to_run_for):
     customers, ingredients = load_customers_and_ingredients(input_file_path)
     genome_size = len(ingredients)
     population_size = genome_size * 5
+    n_top_elites = (population_size // 10) + 1
+
+    print(f"Total number of customers: {len(customers)}")
 
     # randomly create first generation
     current_generation = generate_random_first_population(population_size, genome_size)
-    next_generation = {}
-    generation_with_fitness = {}
 
-    # for
-    for member in current_generation:
-        member_ingredients = ingredients_genome_to_ingredients(member, ingredients)
-        member_fitness = fitness_function(member_ingredients, customers)
+    for generation_number in range(number_of_generation_to_run_for):
+        print("Generation ", generation_number)
+        generation_with_fitness = {}
+        next_generation = {}
 
-        generation_with_fitness[member] = member_fitness
+        # calculate fitness of members
+        for member in current_generation:
+            member_ingredients = ingredients_genome_to_ingredients(member, ingredients)
+            member_fitness = fitness_function(member_ingredients, customers)
 
-    print(f"Total number of customers: {len(customers)}")
-    for member,fitness in generation_with_fitness.items():
-        print(member, fitness)
+            generation_with_fitness[member] = member_fitness
 
+        elites = {member:fitness for member, fitness in sorted(generation_with_fitness.items(), key=lambda item: item[1], reverse=True)[:n_top_elites]}
+
+        for elite in elites:
+            next_generation.append(elites)
+
+        while len(next_generation) < population_size:
+            child_a, child_b = generate_children(current_generation)
+            next_generation.append(child_a)
+            next_generation.append(child_b)
+
+        current_generation = next_generation
+
+    most_fit = {member:fitness for member, fitness in sorted(generation_with_fitness.items(), key=lambda item: item[1], reverse=True)[:n_top_elites]}
+
+        print("Elites: ", elites)
+        for member,fitness in generation_with_fitness.items():
+            print(member, fitness)
+
+
+def generate_children(parent_generation):
+    parent_a, parent_b = select_parents(parent_generat)
+    child_a, child_b = cross_over(parent_a, parent_b)
+    child_a, child_b = mutate(child_a, child_b)
+
+    return child_a, child_b
 
 
 def will_order_pizza(ingredient_combination, customer):
@@ -109,7 +136,7 @@ def load_customers_and_ingredients(input_file_path):
 
 if __name__ == '__main__':
     input_file_path = 'input_data/b_basic.in.txt'
-    main(input_file_path)
+    main(input_file_path, 1)
     # customers, ingredients = load_customers_and_ingredients(input_file_path)
     # print(f"Customers: {len(customers)}\n {customers} \n")
     # print(f"Ingredients: {len(ingredients)}\n {ingredients} \n")
