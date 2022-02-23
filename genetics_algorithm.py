@@ -6,7 +6,19 @@ def main(input_file_path, number_of_generation_to_run_for):
     customers, ingredients = load_customers_and_ingredients(input_file_path)
     genome_size = len(ingredients)
     population_size = genome_size * 5
+    print(population_size)
+
+    # make population size even so there won't be
+    # overflow when adding children
+    if population_size % 2 != 0:
+        population_size += 1
+
+    # make n_top_elites even so there won't be
+    # overflow when adding children
     n_top_elites = (population_size // 10) + 1
+    if (n_top_elites % 2 != 0) and (n_top_elites+1 < population_size):
+        n_top_elites += 1
+
 
     print(f"Total number of customers: {len(customers)}")
 
@@ -15,33 +27,37 @@ def main(input_file_path, number_of_generation_to_run_for):
 
     for generation_number in range(number_of_generation_to_run_for):
         print("Generation ", generation_number)
-        generation_with_fitness = {}
-        next_generation = {}
+        current_generation_with_fitness = {}
+        next_generation = []
 
         # calculate fitness of members
         for member in current_generation:
             member_ingredients = ingredients_genome_to_ingredients(member, ingredients)
             member_fitness = fitness_function(member_ingredients, customers)
 
-            generation_with_fitness[member] = member_fitness
+            current_generation_with_fitness[member] = member_fitness
 
-        elites = {member:fitness for member, fitness in sorted(generation_with_fitness.items(), key=lambda item: item[1], reverse=True)[:n_top_elites]}
+        elites = {member:fitness for member, fitness in sorted(current_generation_with_fitness.items(), key=lambda item: item[1], reverse=True)[:n_top_elites]}
 
         for elite in elites:
-            next_generation.append(elites)
+            next_generation.append(elite)
 
         while len(next_generation) < population_size:
-            child_a, child_b = generate_children(current_generation)
+            child_a, child_b = generate_children(current_generation_with_fitness)
             next_generation.append(child_a)
             next_generation.append(child_b)
 
+        print("Elites: ", elites)
+        print("Population size: ", len(current_generation))
+        for member in current_generation:
+            print(member, current_generation_with_fitness[member])
+
+        print()
+
         current_generation = next_generation
 
-    most_fit = select_most_fit(current_generation)
+    # most_fit = select_most_fit(current_generation)
 
-        print("Elites: ", elites)
-        for member,fitness in generation_with_fitness.items():
-            print(member, fitness)
 
 
 def generate_children(parent_generation):
@@ -61,11 +77,11 @@ def select_parents(parent_generation):
         candidate_a, candidate_b = random.sample(parents, 2)
 
         if parent_generation[candidate_a] > parent_generation[candidate_b]:
-            select_parents.append(candidate_a)
+            selected_parents.append(candidate_a)
         else:
             selected_parents.append(candidate_b)
 
-    return selected parents
+    return selected_parents
 
 
 def cross_over(parent_a, parent_b):
@@ -79,13 +95,13 @@ def cross_over(parent_a, parent_b):
 
 
 def mutate(genome):
-    mutated_genome = genome
-    for idx, genome_bit in genome:
+    mutated_genome = list(genome)
+    for idx, genome_bit in enumerate(genome):
         num = random.random()
         if num < 0.005:
             mutated_genome[idx] = int(not bool(mutated_genome[idx]))
 
-    return mutated_genome
+    return tuple(mutated_genome)
 
 
 def will_order_pizza(ingredient_combination, customer):
@@ -172,7 +188,7 @@ def load_customers_and_ingredients(input_file_path):
 
 if __name__ == '__main__':
     input_file_path = 'input_data/b_basic.in.txt'
-    main(input_file_path, 1)
+    main(input_file_path, 2)
     # customers, ingredients = load_customers_and_ingredients(input_file_path)
     # print(f"Customers: {len(customers)}\n {customers} \n")
     # print(f"Ingredients: {len(ingredients)}\n {ingredients} \n")
