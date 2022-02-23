@@ -37,7 +37,7 @@ def main(input_file_path, number_of_generation_to_run_for):
 
         current_generation = next_generation
 
-    most_fit = {member:fitness for member, fitness in sorted(generation_with_fitness.items(), key=lambda item: item[1], reverse=True)[:n_top_elites]}
+    most_fit = select_most_fit(current_generation)
 
         print("Elites: ", elites)
         for member,fitness in generation_with_fitness.items():
@@ -45,11 +45,47 @@ def main(input_file_path, number_of_generation_to_run_for):
 
 
 def generate_children(parent_generation):
-    parent_a, parent_b = select_parents(parent_generat)
+    parent_a, parent_b = select_parents(parent_generation)
     child_a, child_b = cross_over(parent_a, parent_b)
-    child_a, child_b = mutate(child_a, child_b)
+    child_a = mutate(child_a)
+    child_b = mutate(child_b)
 
     return child_a, child_b
+
+
+def select_parents(parent_generation):
+    parents = list(parent_generation.keys())
+    selected_parents = []
+
+    for i in range(2):
+        candidate_a, candidate_b = random.sample(parents, 2)
+
+        if parent_generation[candidate_a] > parent_generation[candidate_b]:
+            select_parents.append(candidate_a)
+        else:
+            selected_parents.append(candidate_b)
+
+    return selected parents
+
+
+def cross_over(parent_a, parent_b):
+    genome_length = len(parent_a)
+    half = genome_length//2
+
+    child_a = parent_a[:half] + parent_b[half:]
+    child_b = parent_b[:half] + parent_a[half:]
+
+    return child_a, child_b
+
+
+def mutate(genome):
+    mutated_genome = genome
+    for idx, genome_bit in genome:
+        num = random.random()
+        if num < 0.005:
+            mutated_genome[idx] = int(not bool(mutated_genome[idx]))
+
+    return mutated_genome
 
 
 def will_order_pizza(ingredient_combination, customer):
