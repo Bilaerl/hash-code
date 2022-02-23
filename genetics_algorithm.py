@@ -1,12 +1,11 @@
 import random
 
-
-def main(input_file_path, number_of_generation_to_run_for):
+def main(number_of_generation_to_run_for, input_file_path, output_file_path=None):
     # load customers and ingredient from file
     customers, ingredients = load_customers_and_ingredients(input_file_path)
     genome_size = len(ingredients)
     population_size = genome_size * 5
-    print(population_size)
+    print(population_size, genome_size)
 
     # make population size even so there won't be
     # overflow when adding children
@@ -32,10 +31,11 @@ def main(input_file_path, number_of_generation_to_run_for):
 
         # calculate fitness of members
         for member in current_generation:
-            member_ingredients = ingredients_genome_to_ingredients(member, ingredients)
-            member_fitness = fitness_function(member_ingredients, customers)
+            if member not in current_generation_with_fitness:
+                member_ingredients = ingredients_genome_to_ingredients(member, ingredients)
+                member_fitness = fitness_function(member_ingredients, customers)
 
-            current_generation_with_fitness[member] = member_fitness
+                current_generation_with_fitness[member] = member_fitness
 
         elites = {member:fitness for member, fitness in sorted(current_generation_with_fitness.items(), key=lambda item: item[1], reverse=True)[:n_top_elites]}
 
@@ -56,8 +56,24 @@ def main(input_file_path, number_of_generation_to_run_for):
 
         current_generation = next_generation
 
-    # most_fit = select_most_fit(current_generation)
+    most_fit, most_fit_val = select_most_fit(current_generation, ingredients, customers)
 
+    print(f"Most fit: ", most_fit, most_fit_val)
+
+
+def select_most_fit(population, ingredients, customers):
+    most_fit = None
+    most_fit_val = 0
+
+    for member in population:
+        member_ingredients = ingredients_genome_to_ingredients(member, ingredients)
+        member_fitness = fitness_function(member_ingredients, customers)
+
+        if member_fitness > most_fit_val:
+            most_fit = member_ingredients
+            most_fit_val = member_fitness
+
+    return most_fit, most_fit_val
 
 
 def generate_children(parent_generation):
@@ -187,8 +203,10 @@ def load_customers_and_ingredients(input_file_path):
 
 
 if __name__ == '__main__':
-    input_file_path = 'input_data/b_basic.in.txt'
-    main(input_file_path, 2)
+    input_file_path = 'input_data/e_elaborate.in.txt'
+    output_file_path = 'output/' + input_file_path.split('/')[1]
+    # print(output_file_path)
+    main(50, input_file_path, output_file_path)
     # customers, ingredients = load_customers_and_ingredients(input_file_path)
     # print(f"Customers: {len(customers)}\n {customers} \n")
     # print(f"Ingredients: {len(ingredients)}\n {ingredients} \n")
