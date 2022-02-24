@@ -1,5 +1,6 @@
 import random
 
+
 def main(number_of_generation_to_run_for, input_file_path, output_file_path=None):
     # load customers and ingredient from file
     customers, ingredients = load_customers_and_ingredients(input_file_path)
@@ -11,10 +12,16 @@ def main(number_of_generation_to_run_for, input_file_path, output_file_path=None
     if population_size % 2 != 0:
         population_size += 1
 
-    population_size = population_size if population_size < 300 else 300
+    population_size = population_size if population_size < 250 else 250
 
     print(population_size, genome_size)
+    naive_vect = [0 for i in ingredients.keys()]
+    naive_ingr = suggest_ingredients(input_file_path)
 
+    for ind, ingr in ingredients.items():
+        if ingr in naive_ingr:
+            naive_vect[ind] = 1
+    naive_vect = tuple(naive_vect)
     # make n_top_elites even so there won't be
     # overflow when adding children
     n_top_elites = 2 if population_size < 10 else 10
@@ -25,7 +32,7 @@ def main(number_of_generation_to_run_for, input_file_path, output_file_path=None
     print(f"Total number of customers: {len(customers)}")
 
     # randomly create first generation
-    current_generation = generate_random_first_population(population_size, genome_size)
+    current_generation = generate_random_first_population(population_size, genome_size, naive_vect)
 
     for generation_number in range(number_of_generation_to_run_for):
         print("Generation ", generation_number)
@@ -162,8 +169,8 @@ def ingredients_genome_to_ingredients(ingredients_genome, genome_to_ingredient_m
     return ingredients
 
 
-def generate_random_first_population(population_size, genome_size):
-    generated_population = []
+def generate_random_first_population(population_size, genome_size, naive):
+    generated_population = [naive]
 
     while len(generated_population) < population_size:
         member = []
@@ -210,9 +217,65 @@ def load_customers_and_ingredients(input_file_path):
     return customers, ingredients
 
 
+from collections import Counter
+
+
+def find_ingredients(likes, dislikes):
+    ingredient = []
+    for ing in likes.keys():
+        if ing not in dislikes:
+            ingredient.append(ing)
+        else:
+            if likes[ing] >= dislikes[ing]:
+                ingredient.append(ing)
+    num_ingr = len(ingredient)
+    # ingredient.insert(0, str(num_ingr))
+    return ingredient
+
+
+def calc_costumers(customers, ingredients):
+    num_cus = 0
+
+    for customer in customers:
+        if all([elem in ingredients for elem in customer[0]]) and not any(
+                [elem in ingredients for elem in customer[1]]):
+            num_cus += 1
+    return num_cus
+
+
+def suggest_ingredients(FILE):
+
+    with open(FILE) as file:
+        lines = file.readlines()
+        lines = [line.replace('\n', '') for line in lines]
+        file.close()
+
+    num_cus = int(lines.pop(0))
+    n = 0
+    indxs = []
+    customers = []
+    likes, dislikes = [],[]
+
+    for i in range(num_cus):
+        indxs.append(n)
+        n += 2
+    for indx in indxs:
+        like = lines[indx].split()[1:]
+        dislike = [] if lines[indx+1] == '0' else lines[indx+1].split()[1:]
+        customers.append([like, dislike])
+        likes += like
+        dislikes += dislike
+
+    likes, dislikes = Counter(likes), Counter(dislikes)
+    ingredients = find_ingredients(likes, dislikes)
+    return ingredients
+    # with open(FILE.replace('in', 'out'), 'w') as out_file:
+    #     out_file.write(ingredients)
+    #     out_file.close()
+
 
 if __name__ == '__main__':
-    input_file_path = 'input_data/d_difficult.in.txt'
+    input_file_path = 'input_data/e_elaborate.in.txt'
     output_file_path = 'output/' + input_file_path.split('/')[1]
     # print(output_file_path)
     main(100, input_file_path, output_file_path)
@@ -221,3 +284,5 @@ if __name__ == '__main__':
     # print(f"Ingredients: {len(ingredients)}\n {ingredients} \n")
 
     # print(generate_random_first_population(10, 5))
+
+
