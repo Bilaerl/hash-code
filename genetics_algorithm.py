@@ -11,7 +11,7 @@ def main(number_of_generation_to_run_for, input_file_path, output_file_path=None
     if population_size % 2 != 0:
         population_size += 1
 
-    population_size = population_size if population_size < 250 else 250
+    population_size = population_size if population_size < 300 else 300
 
     print(population_size, genome_size)
 
@@ -62,6 +62,12 @@ def main(number_of_generation_to_run_for, input_file_path, output_file_path=None
     most_fit, most_fit_val = select_most_fit(current_generation, ingredients, customers)
 
     print(f"Most fit: ", most_fit, most_fit_val)
+    with open(output_file_path, 'w') as out_file:
+        output = f"{len(most_fit)}"
+        for ingredient in most_fit:
+            output += f" {ingredient}"
+
+        out_file.write(output)
 
 
 def select_most_fit(population, ingredients, customers):
@@ -209,7 +215,7 @@ if __name__ == '__main__':
     input_file_path = 'input_data/d_difficult.in.txt'
     output_file_path = 'output/' + input_file_path.split('/')[1]
     # print(output_file_path)
-    main(50, input_file_path, output_file_path)
+    main(100, input_file_path, output_file_path)
     # customers, ingredients = load_customers_and_ingredients(input_file_path)
     # print(f"Customers: {len(customers)}\n {customers} \n")
     # print(f"Ingredients: {len(ingredients)}\n {ingredients} \n")
