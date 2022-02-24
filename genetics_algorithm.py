@@ -5,18 +5,21 @@ def main(number_of_generation_to_run_for, input_file_path, output_file_path=None
     customers, ingredients = load_customers_and_ingredients(input_file_path)
     genome_size = len(ingredients)
     population_size = genome_size * 5
-    print(population_size, genome_size)
 
     # make population size even so there won't be
     # overflow when adding children
     if population_size % 2 != 0:
         population_size += 1
 
+    population_size = population_size if population_size < 250 else 250
+
+    print(population_size, genome_size)
+
     # make n_top_elites even so there won't be
     # overflow when adding children
-    n_top_elites = (population_size // 10) + 1
-    if (n_top_elites % 2 != 0) and (n_top_elites+1 < population_size):
-        n_top_elites += 1
+    n_top_elites = 2 if population_size < 10 else 10
+    # if (n_top_elites % 2 != 0) and (n_top_elites+1 < population_size):
+    #     n_top_elites += 1
 
 
     print(f"Total number of customers: {len(customers)}")
@@ -47,10 +50,10 @@ def main(number_of_generation_to_run_for, input_file_path, output_file_path=None
             next_generation.append(child_a)
             next_generation.append(child_b)
 
-        print("Elites: ", elites)
+        print("Elites: ", list(elites.values()))
         print("Population size: ", len(current_generation))
         for member in current_generation:
-            print(member, current_generation_with_fitness[member])
+            print(current_generation_with_fitness[member], end="\t")
 
         print()
 
@@ -203,7 +206,7 @@ def load_customers_and_ingredients(input_file_path):
 
 
 if __name__ == '__main__':
-    input_file_path = 'input_data/e_elaborate.in.txt'
+    input_file_path = 'input_data/d_difficult.in.txt'
     output_file_path = 'output/' + input_file_path.split('/')[1]
     # print(output_file_path)
     main(50, input_file_path, output_file_path)
