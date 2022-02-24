@@ -102,15 +102,20 @@ def generate_children(parent_generation):
 
 def select_parents(parent_generation):
     parents = list(parent_generation.keys())
-    selected_parents = []
+    parents_fitness = list(parent_generation.values())
 
-    for i in range(2):
-        candidate_a, candidate_b = random.sample(parents, 2)
+    most_fit = max(parents_fitness)
+    selection_prob = [parent_fitness/most_fit for parent_fitness in parents_fitness]
 
-        if parent_generation[candidate_a] > parent_generation[candidate_b]:
-            selected_parents.append(candidate_a)
-        else:
-            selected_parents.append(candidate_b)
+    selected_parents = random.choices(population=parents, weights=selection_prob, k=2)
+
+    # for i in range(2):
+    #     candidate_a, candidate_b = random.sample(parents, 2)
+    #
+    #     if parent_generation[candidate_a] > parent_generation[candidate_b]:
+    #         selected_parents.append(candidate_a)
+    #     else:
+    #         selected_parents.append(candidate_b)
 
     return selected_parents
 
@@ -287,7 +292,7 @@ if __name__ == '__main__':
     input_file_path = 'input_data/d_difficult.in.txt'
 
     output_file_path = 'output/' + input_file_path.split('/')[1].replace('in', 'out')
-    main(100, input_file_path, output_file_path, max_populatin_size=500)
+    main(100, input_file_path, output_file_path, max_populatin_size=100)
 
     # customers, ingredients = load_customers_and_ingredients(input_file_path)
     # print(f"Customers: {len(customers)}\n {customers} \n")
