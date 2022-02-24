@@ -1,6 +1,6 @@
 import random
 
-def main(number_of_generation_to_run_for, input_file_path, output_file_path=None):
+def main(number_of_generation_to_run_for, input_file_path, output_file_path=None, max_populatin_size=250):
     # load customers and ingredient from file
     customers, ingredients = load_customers_and_ingredients(input_file_path)
     genome_size = len(ingredients)
@@ -11,7 +11,7 @@ def main(number_of_generation_to_run_for, input_file_path, output_file_path=None
     if population_size % 2 != 0:
         population_size += 1
 
-    population_size = population_size if population_size < 300 else 300
+    population_size = population_size if population_size < max_populatin_size else max_populatin_size
 
     print(population_size, genome_size)
 
@@ -212,10 +212,21 @@ def load_customers_and_ingredients(input_file_path):
 
 
 if __name__ == '__main__':
+    # A
+    # input_file_path = 'input_data/a_an_example.in.txt'
+
+    # B
+    # input_file_path = 'input_data/b_basic.in.txt'
+
+    # C
+    # input_file_path = 'input_data/c_coarse.in.txt'
+
+    # D
     input_file_path = 'input_data/d_difficult.in.txt'
-    output_file_path = 'output/' + input_file_path.split('/')[1]
-    # print(output_file_path)
-    main(100, input_file_path, output_file_path)
+
+    output_file_path = 'output/' + input_file_path.split('/')[1].replace('in', 'out')
+    main(100, input_file_path, output_file_path, max_populatin_size=500)
+
     # customers, ingredients = load_customers_and_ingredients(input_file_path)
     # print(f"Customers: {len(customers)}\n {customers} \n")
     # print(f"Ingredients: {len(ingredients)}\n {ingredients} \n")
